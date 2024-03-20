@@ -141,7 +141,7 @@ elements f = sequenceA . fmap f
 -- toListOf :: Traversal s s a a -> (s -> [a])
 -- @
 toListOf :: Optic (->) (K (Endo [a])) s s a a -> (s -> [a])
-toListOf t s = error "todo"
+toListOf t = (`appEndo` []) . getK . t (\x -> K (Endo (x:)))
 
 -- | A function which takes any kind of Optic which might
 -- be focused on zero subparts and returns Just the first
@@ -151,13 +151,13 @@ toListOf t s = error "todo"
 -- preview :: Traversal s s a a -> (s -> Maybe a)
 -- @
 preview :: Optic (->) (K (First a)) s s a a -> (s -> Maybe a)
-preview = error "todo"
+preview t = getFirst . getK . t (K . First . Just)
 
 -- | A helper function which witnesses the fact that any
 -- container which is both a Functor and a Contravariant
 -- must actually be empty.
 coerce :: (Contravariant f, Functor f) => f a -> f b
-coerce = error "todo"
+coerce s = error "todo"
 
 -- | A Fold which views the result of a function application
 to :: (a -> b) -> Fold a b
@@ -165,11 +165,11 @@ to f s t = contramap f (s (f t)) -- TODO: check?
 
 -- | A prism which focuses on the left branch of an Either
 _Left :: Prism (Either a x) (Either b x) a b
-_Left = error "todo"
+_Left = dimap (either Right (Left . Right)) (either pure (fmap Left)) . right'
 
 -- | A prism which focuses on the right branch of an Either
 _Right :: Prism (Either x a) (Either x b) a b
-_Right = error "todo"
+_Right = dimap (either (Left . Left) Right) (either pure (fmap Right)) . right'
 
 -- | An iso which witnesses that tuples can be flipped without
 -- losing any information
